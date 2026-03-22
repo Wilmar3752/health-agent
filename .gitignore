@@ -1,0 +1,35 @@
+# User data — never commit personal health info or credentials
+config.json
+.env
+
+# Logs
+logs/*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# uv
+.uv-cache/
+
+# macOS
+.DS_Store
+
+# Claude Code local settings
+.claude/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo

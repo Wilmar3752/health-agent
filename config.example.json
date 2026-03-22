@@ -1,0 +1,23 @@
+{
+  "profile": {
+    "name": "Your Name",
+    "weight_kg": 80,
+    "height_cm": 175,
+    "age": 30,
+    "gender": "male",
+    "activity_level": "moderate"
+  },
+  "goal": {
+    "type": "lose_weight",
+    "target_weight_kg": 75,
+    "timeframe_weeks": 8
+  },
+  "preferences": {
+    "dietary_restrictions": [],
+    "cuisine": []
+  },
+  "notification": {
+    "whatsapp_phone": "+15551234567",
+    "whatsapp_apikey": "123456"
+  }
+}
