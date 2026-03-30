@@ -52,7 +52,7 @@ def run_agent() -> None:
 
     n = config.get("notification", {})
     if n.get("kapso_apikey") and n.get("kapso_phone_number_id"):
-        send_whatsapp(config, wa_msg)
+        send_whatsapp(config, full_plan)
     else:
         print("💡 Tip: agrega kapso_apikey y kapso_phone_number_id en notification del config.")
 
