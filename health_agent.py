@@ -51,10 +51,10 @@ def run_agent() -> None:
     print()
 
     n = config.get("notification", {})
-    if n.get("whatsapp_phone") and n.get("whatsapp_apikey"):
+    if n.get("kapso_apikey") and n.get("kapso_phone_number_id"):
         send_whatsapp(config, wa_msg)
     else:
-        print("💡 Tip: ejecuta --setup para configurar entrega por WhatsApp.")
+        print("💡 Tip: agrega kapso_apikey y kapso_phone_number_id en notification del config.")
 
 
 def main() -> None:

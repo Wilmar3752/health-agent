@@ -1,52 +1,49 @@
 """
-WhatsApp delivery via CallMeBot (https://www.callmebot.com).
-
-Free tier — no account or credit card required.
-One-time activation per phone number (see README for instructions).
+WhatsApp delivery via Kapso CLI (https://docs.kapso.ai).
+Uses `kapso whatsapp messages send` to avoid Cloudflare restrictions on direct API calls.
 """
 
-import urllib.error
-import urllib.parse
-import urllib.request
+import subprocess
 
 
-CALLMEBOT_URL = "https://api.callmebot.com/whatsapp.php"
-REQUEST_TIMEOUT = 15  # seconds
+def _send_to(name: str, phone: str, phone_number_id: str, message: str) -> bool:
+    result = subprocess.run(
+        [
+            "kapso", "whatsapp", "messages", "send",
+            "--phone-number-id", phone_number_id,
+            "--to", phone,
+            "--text", message,
+            "--output", "human",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        print(f"✅ Plan enviado por WhatsApp a {name} ({phone})")
+        return True
+    error = (result.stderr or result.stdout).strip()[:200]
+    print(f"❌ Error al enviar a {name} ({phone}): {error}")
+    return False
 
 
-def send_whatsapp(config: dict, message: str) -> bool:
-    """
-    Send a WhatsApp message via CallMeBot.
+def send_whatsapp(config: dict, message: str) -> None:
+    """Send the meal plan to all configured WhatsApp numbers via Kapso CLI."""
+    n = config.get("notification", {})
+    phone_number_id = n.get("kapso_phone_number_id", "").strip()
 
-    Reads whatsapp_phone and whatsapp_apikey from config["notification"].
-    Returns True if the message was queued successfully.
-    """
-    n      = config.get("notification", {})
-    phone  = n.get("whatsapp_phone", "").strip()
-    apikey = n.get("whatsapp_apikey", "").strip()
+    if not phone_number_id:
+        print("⚠️  Falta kapso_phone_number_id en notification.")
+        return
 
-    if not phone or not apikey:
-        return False
+    phones = []
+    if p := config.get("profile", {}).get("whatsapp_phone", "").strip():
+        phones.append((config["profile"]["name"], p))
+    if p := config.get("profile2", {}).get("whatsapp_phone", "").strip():
+        phones.append((config["profile2"]["name"], p))
 
-    params = urllib.parse.urlencode({
-        "phone":  phone,
-        "text":   message,
-        "apikey": apikey,
-    })
-    url = f"{CALLMEBOT_URL}?{params}"
+    if not phones:
+        print("⚠️  No hay números de WhatsApp configurados en los perfiles.")
+        return
 
-    try:
-        with urllib.request.urlopen(url, timeout=REQUEST_TIMEOUT) as resp:
-            body = resp.read().decode("utf-8", errors="ignore")
-            if resp.status == 200 and "Message queued" in body:
-                print(f"✅ Plan enviado por WhatsApp a {phone}")
-                return True
-            print(f"⚠️  CallMeBot respondió ({resp.status}): {body[:140]}")
-            return False
-
-    except urllib.error.HTTPError as e:
-        print(f"❌ Error HTTP al enviar WhatsApp ({e.code}): {e.reason}")
-        return False
-    except Exception as e:
-        print(f"❌ No se pudo enviar el WhatsApp: {e}")
-        return False
+    for name, phone in phones:
+        _send_to(name, phone, phone_number_id, message)
